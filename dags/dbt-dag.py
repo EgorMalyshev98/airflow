@@ -15,9 +15,9 @@ from dbt_airflow.operators.bash import DbtBaseOperator
 
 with DAG(
     dag_id='test_dag',
-    start_date=datetime(2021, 1, 1),
+    start_date=datetime(2023, 12, 12),
     catchup=False,
-    tags=['example'],
+    tags=['dbt'],
 ) as dag:
 
     extra_tasks = [
@@ -81,16 +81,16 @@ with DAG(
             manifest_path=Path('/opt/airflow/dags/oup_dbt/target/manifest.json'),
         ),
         dbt_profile_config=DbtProfileConfig(
-            profiles_path=Path('/opt/airflow/dags/oup_dbt/profiles.yml'),
+            profiles_path=Path('/opt/airflow/dags/oup_dbt/'),
             target='prod',
         ),
         dbt_airflow_config=DbtAirflowConfig(
             extra_tasks=extra_tasks,
             execution_operator=ExecutionOperator.BASH,
-            select=['tag:daily'],
-            exclude=['*'],
+            # select=['tag:daily'],
+            # exclude=['*'],
             full_refresh=True,
-            variables='{key: value, date: 20190101}',
+            # variables='{key: value, date: 20190101}',
             no_partial_parse=True,
         )
     )

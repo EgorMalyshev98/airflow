@@ -75,7 +75,7 @@ x-airflow-common:
     # for other purpose (development, test and especially production usage) build/extend Airflow image.
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
   networks:
-    - superset_superset
+    - airflow
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
@@ -103,23 +103,24 @@ services:
       interval: 10s
       retries: 5
       start_period: 5s
-    restart: always
+    # restart: always
     networks:
-    - superset_superset
+      - airflow
+      - superset_superset
 
   redis:
     image: redis:7.2.3
-    expose:
-      - 6379
+    ports:
+      - "6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 30s
       retries: 50
       start_period: 30s
-    restart: always
+    # restart: always
     networks:
-    - superset_superset
+      - airflow
 
   airflow-webserver:
     <<: *airflow-common
@@ -132,9 +133,12 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    restart: always
+    # restart: always
     depends_on: 
       - airflow-init
+    networks:
+      - superset_superset
+      - airflow
         
 
   airflow-scheduler:
@@ -146,7 +150,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    restart: always
+    # restart: always
     depends_on: 
       - airflow-init
         
@@ -167,9 +171,11 @@ services:
       # Required to handle warm shutdown of the celery workers properly
       # See https://airflow.apache.org/docs/docker-stack/entrypoint.html#signal-propagation
       DUMB_INIT_SETSID: "0"
-    restart: always
+    # restart: always
     depends_on: 
       - airflow-init
+    networks:
+      - superset_superset
         
 
   airflow-triggerer:
@@ -181,7 +187,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    restart: always
+    # restart: always
     depends_on: 
       - airflow-init
         
@@ -267,21 +273,21 @@ services:
     volumes:
       - ${AIRFLOW_PROJ_DIR:-.}:/sources
 
-  airflow-cli:
-    <<: *airflow-common
-    # profiles:
-    #   - debug
-    deploy:
-      restart_policy:
-        condition: none
-    environment:
-      <<: *airflow-common-env
-      CONNECTION_CHECK_MAX_COUNT: "0"
-    # Workaround for entrypoint issue. See: https://github.com/apache/airflow/issues/16252
-    command:
-      - bash
-      - -c
-      - airflow
+  # airflow-cli:
+  #   <<: *airflow-common
+  #   # profiles:
+  #   #   - debug
+  #   deploy:
+  #     restart_policy:
+  #       condition: none
+  #   environment:
+  #     <<: *airflow-common-env
+  #     CONNECTION_CHECK_MAX_COUNT: "0"
+  #   # Workaround for entrypoint issue. See: https://github.com/apache/airflow/issues/16252
+  #   command:
+  #     - bash
+  #     - -c
+  #     - airflow
 
   # You can enable flower by adding "--profile flower" option e.g. docker-compose --profile flower up
   # or by explicitly targeted on the command line e.g. docker-compose up flower.
@@ -299,9 +305,11 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    restart: always
+    # restart: always
     depends_on:
       - airflow-init
+    networks:
+      - airflow
         
 
 volumes:
@@ -310,3 +318,6 @@ volumes:
 networks:
   superset_superset:
     external: true
+  
+  airflow:
+    external: false
