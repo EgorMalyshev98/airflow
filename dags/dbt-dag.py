@@ -81,7 +81,7 @@ with DAG(
             manifest_path=Path('/opt/airflow/dags/oup_dbt/target/manifest.json'),
         ),
         dbt_profile_config=DbtProfileConfig(
-            profiles_path=Path('/opt/airflow/dags/oup_dbt/'),
+            profiles_path=Path('/opt/airflow/dags/oup_dbt/.dbt/'),
             target='prod',
         ),
         dbt_airflow_config=DbtAirflowConfig(
