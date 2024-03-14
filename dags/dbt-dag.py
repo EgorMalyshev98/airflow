@@ -14,7 +14,7 @@ from dbt_airflow.operators.bash import DbtBaseOperator
 
 
 with DAG(
-    dag_id='test_dag',
+    dag_id='dbt_airflow_dag',
     start_date=datetime(2023, 12, 12),
     catchup=False,
     tags=['dbt'],

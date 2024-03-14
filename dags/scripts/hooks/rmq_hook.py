@@ -1,4 +1,3 @@
-import queue
 from typing import Any, Dict
 from airflow.providers.telegram.hooks.telegram import TelegramHook
 
