@@ -9,6 +9,15 @@ aio-pika==9.1.4
 asyncpg==0.28.0
 loguru==0.7.2
 pandas==2.0.3
-pydantic==2.1.1
+# pydantic==2.0.0 conflict with dbt
 python-dotenv==1.0.0
-SQLAlchemy==2.0.19
+# SQLAlchemy==2.0.19 conflict with dbt
+
+#telegram
+apache-airflow-providers-telegram==4.3.0
+
+#dockerOpertator
+apache-airflow-providers-docker==3.9.1
+
+#Rabbitmq
+pika==1.3.2
