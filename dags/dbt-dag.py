@@ -5,12 +5,16 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.empty import EmptyOperator
 
-
 from dbt_airflow.core.config import DbtAirflowConfig, DbtProjectConfig, DbtProfileConfig
 from dbt_airflow.core.task_group import DbtTaskGroup
 from dbt_airflow.core.task import ExtraTask
 from dbt_airflow.operators.execution import ExecutionOperator
-from dbt_airflow.operators.bash import DbtBaseOperator
+from dbt_airflow.operators.bash import DbtBashOperator
+
+
+project_path=Path('/opt/airflow/dags/oup_dbt/')
+manifest_path=Path('/opt/airflow/dags/oup_dbt/target/manifest.json')
+profiles_path=Path('/opt/airflow/dags/oup_dbt/.dbt/')
 
 
 with DAG(
@@ -19,69 +23,41 @@ with DAG(
     catchup=False,
     tags=['dbt'],
 ) as dag:
-
-    extra_tasks = [
-        # ExtraTask(
-        #     task_id='test_task',
-        #     operator=DbtBaseOperator(dbt_base_command='dbt debug'),
-        #     # operator_args={
-        #     #     'dbt': lambda: print('Hello world'),
-        #     # },
-        #     # upstream_task_ids={
-        #     #     'model.example_dbt_project.int_customers_per_store',
-        #     #     'model.example_dbt_project.int_revenue_by_date'
-        #     # }
-        # )
-        # ExtraTask(
-        #     task_id='test_task',
-        #     operator=PythonOperator,
-        #     operator_args={
-        #         'python_callable': lambda: print('Hello world'),
-        #     },
-        #     upstream_task_ids={
-        #         'model.example_dbt_project.int_customers_per_store',
-        #         'model.example_dbt_project.int_revenue_by_date'
-        #     }
-        # ),
-        # ExtraTask(
-        #     task_id='another_test_task',
-        #     operator=PythonOperator,
-        #     operator_args={
-        #         'python_callable': lambda: print('Hello world 2!'),
-        #     },
-        #     upstream_task_ids={
-        #         'test.example_dbt_project.int_customers_per_store',
-        #     },
-        #     downstream_task_ids={
-        #         'snapshot.example_dbt_project.int_customers_per_store_snapshot',
-        #     }
-        # ),
-        # ExtraTask(
-        #     task_id='test_task_3',
-        #     operator=PythonOperator,
-        #     operator_args={
-        #         'python_callable': lambda: print('Hello world 3!'),
-        #     },
-        #     downstream_task_ids={
-        #         'snapshot.example_dbt_project.int_customers_per_store_snapshot',
-        #     },
-        #     upstream_task_ids={
-        #         'model.example_dbt_project.int_revenue_by_date',
-        #     },
-        # )
-    ]
-
+    
     t1 = EmptyOperator(task_id='empty_1')
     t2 = EmptyOperator(task_id='empty_2')
+    
+    extra_tasks = [
+        ExtraTask(
+            task_id='test_source',
+            operator = DbtBashOperator,
+            operator_args={
+                "dbt_base_command": 'test -s "source:*" --exclude "test__mart__gant_archive_by_month", "test__duplication_of_oper"  ',
+                "dbt_profile_path": profiles_path,
+                "dbt_project_path": project_path,
+                "dbt_target_profile": 'prod',
+                "select": None,
+                "exclude": None,
+                "full_refresh": None,
+                "no_write_json": None,
+                "variables": None
+            },
+            downstream_task_ids={
+                "model.oup_dbt.int__gant_start_transform",
+                "model.oup_dbt.int__vdc_by_objects",
+                "model.oup_dbt.int__archive_by_month"
+            }
+        )
+    ]
 
     tg = DbtTaskGroup(
         group_id='dbt-company',
         dbt_project_config=DbtProjectConfig(
-            project_path=Path('/opt/airflow/dags/oup_dbt/'),
-            manifest_path=Path('/opt/airflow/dags/oup_dbt/target/manifest.json'),
+            project_path=project_path,
+            manifest_path=manifest_path,
         ),
         dbt_profile_config=DbtProfileConfig(
-            profiles_path=Path('/opt/airflow/dags/oup_dbt/.dbt/'),
+            profiles_path=profiles_path,
             target='prod',
         ),
         dbt_airflow_config=DbtAirflowConfig(

@@ -10,7 +10,8 @@ with DAG(
     dag_id="zhufwr_import",
     start_date=datetime(2023, 12, 12),
     catchup=False,
-    tags=["dbt", "1c"]
+    tags=["dbt", "1c"],
+    schedule=None,
 ) as dag:
     
     import_1c = DockerOperator(
