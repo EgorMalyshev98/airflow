@@ -1,7 +1,7 @@
 from datetime import timedelta
 from airflow.sensors.base import BaseSensorOperator
 
-from scripts.hooks.rmq_hook import RMQHook
+from hooks.rmq_hook import RMQHook
 
 class RMQSensor(BaseSensorOperator):
     """
