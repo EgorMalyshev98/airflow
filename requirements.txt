@@ -1,8 +1,9 @@
 
 #oup_dbt dag
-dbt-core==1.5.3
-dbt-postgres==1.5.3
+dbt-postgres==1.7.10
 dbt-airflow==2.9.1
+dbt-af==0.4.0
+pytest==8.1.1
 
 #1c connector
 aio-pika==9.1.4
