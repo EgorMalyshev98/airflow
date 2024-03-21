@@ -1,8 +1,6 @@
 import datetime
 from airflow.notifications.basenotifier import BaseNotifier
 from hooks.telegram_hook import TelegramBotHook
-from telegram import Bot
-import pendulum
 
 
 class TelegramNotification(BaseNotifier):
