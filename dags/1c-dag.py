@@ -21,18 +21,19 @@ with DAG(
     start_date=datetime(2021, 1, 1),
     catchup=False,
     tags=["rmq", "dbt", "1c"],
-    schedule_interval=None,
+    schedule_interval=timedelta(hours=1),
     default_args=default_args,
     description="extract files from 1c RabbitMQ queue to postgres DWH"
 ) as dag:
+    
     rmq_sensor = RMQSensor(
         task_id="rmq_task_1",
         rmq_conn_id="1c_rmq_dev",
-        mode="poke",
-        poke_interval=5,
-        timeout=10 * 3,
+        mode="reschedule",
+        poke_interval=60 * 3,
+        timeout=60 * 59,
         soft_fail=True,
-        # wait_for_downstream=True,
+        wait_for_downstream=True,
     )
 
     import_1c = DockerSwarmOperator(
