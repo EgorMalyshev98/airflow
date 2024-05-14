@@ -4,6 +4,7 @@ from pathlib import Path
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.empty import EmptyOperator
+from airflow.models import Variable
 
 from dbt_airflow.core.config import DbtAirflowConfig, DbtProjectConfig, DbtProfileConfig
 from dbt_airflow.core.task_group import DbtTaskGroup
@@ -11,10 +12,19 @@ from dbt_airflow.core.task import ExtraTask
 from dbt_airflow.operators.execution import ExecutionOperator
 from dbt_airflow.operators.bash import DbtBashOperator
 
+from notifiers.tg_notifier import TelegramNotification
+
 
 project_path=Path('/opt/airflow/dags/oup_dbt/')
 manifest_path=Path('/opt/airflow/dags/oup_dbt/target/manifest.json')
 profiles_path=Path('/opt/airflow/dags/oup_dbt/.dbt/')
+
+default_args = {
+    "on_failure_callback": TelegramNotification(
+        telegram_bot_token=Variable.get("tg_bot_token"),
+        telegram_chat_id=Variable.get("alerting_chat_id"),
+    )
+}
 
 
 with DAG(
@@ -22,6 +32,7 @@ with DAG(
     start_date=datetime(2023, 12, 12),
     catchup=False,
     tags=['dbt'],
+    default_args=default_args
 ) as dag:
     
     t1 = EmptyOperator(task_id='empty_1')
