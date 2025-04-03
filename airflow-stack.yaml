@@ -50,7 +50,7 @@ x-airflow-common:
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line, place your Dockerfile in the directory where you placed the docker-compose.yaml
   # and uncomment the "build" line below, Then run `docker-compose build` to build the images.
-  image: oup-airflow:1
+  image: oup-airflow:2
   # build: .
   env_file:
     - ./.env
@@ -295,7 +295,7 @@ services:
   #   command:
   #     - bash
   #     - -c
-  #     - airflow
+  #     - airflow db migrate
 
   # You can enable flower by adding "--profile flower" option e.g. docker-compose --profile flower up
   # or by explicitly targeted on the command line e.g. docker-compose up flower.
