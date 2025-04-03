@@ -4,8 +4,8 @@ from airflow.models import Variable
 from airflow.operators.python import PythonOperator
 from airflow.providers.docker.operators.docker import DockerOperator
 from airflow.providers.docker.operators.docker_swarm import DockerSwarmOperator
-from notifiers.tg_notifier import TelegramNotification
-from sensors.rmq_sensor import RMQSensor
+from plugins.notifiers.tg_notifier import TelegramNotification
+from plugins.sensors.rmq_sensor import RMQSensor
 from airflow import DAG
 
 from dbt_airflow.core.config import DbtAirflowConfig, DbtProjectConfig, DbtProfileConfig
@@ -32,7 +32,7 @@ with DAG(
     start_date=datetime(2021, 1, 1),
     catchup=False,
     tags=["rmq", "dbt", "1c"],
-    schedule_interval=timedelta(minutes=60),
+    schedule_interval=None,
     default_args=default_args,
     description="extract files from 1c RabbitMQ queue to postgres DWH"
 ) as dag:

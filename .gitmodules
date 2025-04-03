@@ -1,3 +1,0 @@
-[submodule "dags/oup_dbt"]
-	path = dags/oup_dbt
-	url = https://github.com/EgorMalyshev98/oup_dbt.git
