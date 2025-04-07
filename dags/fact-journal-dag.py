@@ -4,19 +4,20 @@ from airflow.models.baseoperator import chain
 from airflow.models.variable import Variable
 from pendulum import datetime
 
-from plugins.notifiers.tg_notifier import TelegramNotification
-from plugins.sensors.rmq_sensor import RMQSensor
+from notifiers.tg_notifier import TelegramNotification
+from sensors.rmq_sensor import RMQSensor
 
 
-default_args = {
-    "on_failure_callback": TelegramNotification(
-        telegram_bot_token=Variable.get("tg_bot_token"),
-        telegram_chat_id=Variable.get("alerting_chat_id"),
-    )
-}
+# default_args = {
+#     "on_failure_callback": TelegramNotification(
+#         telegram_bot_token=Variable.get("tg_bot_token"),
+#         telegram_chat_id=Variable.get("alerting_chat_id"),
+#     )
+# }
 
 
 @dag(
+    dag_id='fact_journal_dag',
     start_date=datetime(2025, 4, 2),
     end_date=None,
     catchup=False,
@@ -25,10 +26,9 @@ default_args = {
     max_consecutive_failed_dag_runs=5,
     on_failure_callback=None,
     on_success_callback=None,
-    default_args=default_args,
+    # default_args=default_args,
     tags=['1c', 'dbt', 'dwh']
 )
-
 def journal_1c_dag():
     """1c ЖУФВР ETL
     """

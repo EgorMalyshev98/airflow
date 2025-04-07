@@ -1,5 +1,3 @@
-oup_dbt
-connector_1c
-sub-dags
+
 scripts
 __init__.py

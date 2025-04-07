@@ -4,23 +4,23 @@ from airflow.models import Variable
 from airflow.operators.python import PythonOperator
 from airflow.providers.docker.operators.docker import DockerOperator
 from airflow.providers.docker.operators.docker_swarm import DockerSwarmOperator
-from plugins.notifiers.tg_notifier import TelegramNotification
-from plugins.sensors.rmq_sensor import RMQSensor
+from notifiers.tg_notifier import TelegramNotification
+from sensors.rmq_sensor import RMQSensor
 from airflow import DAG
 
-from dbt_airflow.core.config import DbtAirflowConfig, DbtProjectConfig, DbtProfileConfig
-from dbt_airflow.core.task_group import DbtTaskGroup
-from dbt_airflow.core.task import ExtraTask
-from dbt_airflow.operators.execution import ExecutionOperator
-from dbt_airflow.operators.bash import DbtBashOperator
+# from dbt_airflow.core.config import DbtAirflowConfig, DbtProjectConfig, DbtProfileConfig
+# from dbt_airflow.core.task_group import DbtTaskGroup
+# from dbt_airflow.core.task import ExtraTask
+# from dbt_airflow.operators.execution import ExecutionOperator
+# from dbt_airflow.operators.bash import DbtBashOperator
 
 
-default_args = {
-    "on_failure_callback": TelegramNotification(
-        telegram_bot_token=Variable.get("tg_bot_token"),
-        telegram_chat_id=Variable.get("alerting_chat_id"),
-    )
-}
+# default_args = {
+#     "on_failure_callback": TelegramNotification(
+#         telegram_bot_token=Variable.get("tg_bot_token"),
+#         telegram_chat_id=Variable.get("alerting_chat_id"),
+#     )
+# }
 
 project_path=Path('/opt/airflow/dags/oup_dbt/')
 manifest_path=Path('/opt/airflow/dags/oup_dbt/target/manifest.json')
@@ -31,9 +31,9 @@ with DAG(
     dag_id="1c",
     start_date=datetime(2021, 1, 1),
     catchup=False,
-    tags=["rmq", "dbt", "1c"],
+    tags=["rmq", "dbt", "2c"],
     schedule_interval=None,
-    default_args=default_args,
+    # default_args=default_args,``
     description="extract files from 1c RabbitMQ queue to postgres DWH"
 ) as dag:
     
