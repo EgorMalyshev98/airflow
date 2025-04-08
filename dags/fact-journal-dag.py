@@ -1,5 +1,7 @@
 from airflow.decorators import dag
 from airflow.providers.docker.operators.docker import DockerOperator
+from airflow.providers.docker.operators.docker_swarm import DockerSwarmOperator
+
 from airflow.models.baseoperator import chain
 from airflow.models.variable import Variable
 from pendulum import datetime
@@ -34,38 +36,46 @@ def journal_1c_dag():
     """
     rabbit_sensor = RMQSensor(
         task_id="rabbit_journal_sensor_task",
-        rmq_conn_id="1c_rmq_dev",
+        rmq_url=Variable.get('DEV_1C_MQ_URL'),
+        rmq_queue=Variable.get('DEV_1C_QUEUE'),
         mode="reschedule",
-        poke_interval=60 * 3,
+        poke_interval=30,
         timeout=60 * 10 - 60,
         soft_fail=True,
-        wait_for_downstream=True,
+        wait_for_downstream=False,
     )
-
+    
     rabbit_consumer = DockerOperator(
         task_id='rabbit_journal_consumer_task',
         image='tsm-dwh-consumer:1',
         api_version='auto',
-        command='dbt build',
+        docker_url='unix://var/run/docker.sock',
+        network_mode='bridge',
         environment=
         {
-            'DBT_HOST': '172.17.0.1'
+            'DB_DNS': Variable.get('DWH_DB_DNS_SECRET'),
+            'MQ_URL': Variable.get('DEV_1C_MQ_URL'),
+            'QUEUE': Variable.get('DEV_1C_QUEUE'),
+            'HEARTBEAT': 15,
         },
-        mem_limit='1g',
         # network_mode='brige',
         auto_remove='success'
     )
     
     dbt_run = DockerOperator(
-        task_id='second_task',
+        task_id='dbt_journal_task',
         image='tsm-dwh-dbt:1',
         api_version='auto',
+        docker_url='unix://var/run/docker.sock',
+        network_mode='bridge',
         command='dbt build',
         environment=
         {
-            'DBT_HOST': '172.17.0.1'
+            'DBT_HOST': Variable.get('DBT_HOST_SECRET'),
+            'DBT_PASS': Variable.get('DBT_PASS_SECRET'),
+            'DBT_PORT': Variable.get('DBT_PORT'),
+            'DBT_USER': Variable.get('DBT_USER')
         },
-        mem_limit='1g',
         # network_mode='brige',
         auto_remove='success'
     )

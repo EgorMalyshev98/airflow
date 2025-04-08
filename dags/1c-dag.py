@@ -7,6 +7,7 @@ from airflow.providers.docker.operators.docker_swarm import DockerSwarmOperator
 from notifiers.tg_notifier import TelegramNotification
 from sensors.rmq_sensor import RMQSensor
 from airflow import DAG
+from airflow.models.variable import Variable
 
 # from dbt_airflow.core.config import DbtAirflowConfig, DbtProjectConfig, DbtProfileConfig
 # from dbt_airflow.core.task_group import DbtTaskGroup
@@ -39,7 +40,7 @@ with DAG(
     
     rmq_sensor = RMQSensor(
         task_id="rmq_task_sensor",
-        rmq_conn_id="1c_rmq_dev",
+        rmg_url=Variable.get(''),
         mode="reschedule",
         poke_interval=60 * 3,
         timeout=60 * 10 - 60,

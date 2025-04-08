@@ -1,5 +1,7 @@
 from datetime import timedelta
 from airflow.sensors.base import BaseSensorOperator
+from loguru import logger
+
 
 from hooks.rmq_hook import RMQHook
 
@@ -9,19 +11,12 @@ class RMQSensor(BaseSensorOperator):
     
     :param rmq_conn_id: RabbitMQ connection id from airflows connections
     :param params: dict connection params:
-        {
-            host: localhost
-            virtual_host: None
-            port: 5672
-            login: None
-            password: None
-            queue: None
-            heartbeat: None
-        }
     :return: RMQSensor object
     """
     def __init__(
             self, *, 
+            rmq_queue: str,
+            rmq_url: str,
             poke_interval: timedelta | float = 60, 
             timeout: timedelta | float = ..., 
             soft_fail: bool = False, 
@@ -29,8 +24,6 @@ class RMQSensor(BaseSensorOperator):
             exponential_backoff: bool = False, 
             max_wait: timedelta | float | None = None, 
             silent_fail: bool = False,
-            rmq_conn_id: str | None = None,
-            conn_params: dict | None = None,
             **kwargs
             ) -> None:
         
@@ -43,14 +36,15 @@ class RMQSensor(BaseSensorOperator):
                 max_wait=max_wait, 
                 silent_fail=silent_fail, 
                 **kwargs)
-            self.rmq_conn_id = rmq_conn_id,
-            self.conn_params = conn_params
-            
+            self.rmq_url = rmq_url
+            self.rmq_queue = rmq_queue
             
     def poke(self, context):
-        rmq_hook = RMQHook(self.rmq_conn_id)
-        msg_count = rmq_hook.len_queue()
+        rmq_hook = RMQHook(self.rmq_url)
+        msg_count = rmq_hook.len_queue(self.rmq_queue)
+        logger.info(f'Message count: {msg_count}')
         print(f'Message count: {msg_count}')
+
         
         if msg_count:
             return True

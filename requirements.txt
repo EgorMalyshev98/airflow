@@ -6,3 +6,6 @@ apache-airflow-providers-docker==3.9.1
 
 #Rabbitmq
 pika==1.3.2
+
+#logger
+loguru==0.7.2
